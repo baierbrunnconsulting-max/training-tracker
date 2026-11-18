@@ -181,7 +181,7 @@ function ExercisesPage({ exercises }: { exercises: Exercise[] }) {
           <input key={`photo-${fileInputKey}`} type="file" accept="image/*" disabled={loadingPhoto || saving} onChange={(event) => void selectPhoto(event.target.files?.[0])} />
           {photo && <span className="small-note">Photo ready ({Math.round(photo.size / 1024)} KB)</span>}
         </label>
-        {photo && <div className="editor-actions"><ExercisePhoto photo={photo} /><button type="button" className="text-button" disabled={loadingPhoto || saving} onClick={() => setPhoto(undefined)}>Remove photo</button></div>}
+        {photo && <div className="editor-actions"><ExercisePhoto photo={photo} /><button type="button" className="text-button" disabled={loadingPhoto || saving} onClick={() => { if (window.confirm('Remove photo? Are you sure?')) setPhoto(undefined); }}>Remove photo</button></div>}
         {loadingPhoto && <p className="small-note" role="status">Preparing photo...</p>}
         {error && <p className="error-message" role="alert">{error}</p>}
         <button className="button primary" type="submit" disabled={loadingPhoto || saving}>{editing ? 'Save exercise' : 'Add exercise'}</button>
@@ -204,6 +204,7 @@ function ExercisesPage({ exercises }: { exercises: Exercise[] }) {
               </div>
               <button className="text-button" disabled={loadingPhoto || saving} onClick={() => editExercise(exercise)} aria-label={`Edit ${exercise.name}`}>Edit</button>
               <button className="icon-button" disabled={loadingPhoto || saving} aria-label={`Archive ${exercise.name}`} onClick={() => {
+                if (!window.confirm(`Delete exercise "${exercise.name}"? Are you sure?`)) return;
                 void db.exercises.update(exercise.id, { archived: true, updatedAt: Date.now() })
                   .then(() => { if (editing?.id === exercise.id) resetForm(); })
                   .catch((archiveError: unknown) => setError(archiveError instanceof Error ? archiveError.message : 'Could not archive this exercise.'));
@@ -342,7 +343,7 @@ function RoutinesPage({ exercises }: { exercises: Exercise[] }) {
                       <div className="editor-actions">
                         <button className="text-button" type="button" disabled={index === 0} onClick={() => moveItem(index, -1)} aria-label={`Move item ${index + 1} up`}>Up</button>
                         <button className="text-button" type="button" disabled={index === items.length - 1} onClick={() => moveItem(index, 1)} aria-label={`Move item ${index + 1} down`}>Down</button>
-                        <button className="text-button" type="button" onClick={() => setItems((current) => current.filter((_, itemIndex) => itemIndex !== index))} aria-label={`Remove item ${index + 1}`}>Remove</button>
+                        <button className="text-button" type="button" onClick={() => { if (window.confirm(`Remove "${exercise?.name ?? 'this exercise'}" from the routine? Are you sure?`)) setItems((current) => current.filter((_, itemIndex) => itemIndex !== index)); }} aria-label={`Remove item ${index + 1}`}>Remove</button>
                       </div>
                     </div>
                   </li>
@@ -369,6 +370,7 @@ function RoutinesPage({ exercises }: { exercises: Exercise[] }) {
                 <div className="editor-actions">
                   <button className="text-button" disabled={saving} aria-label={`Edit ${routine.name}`} onClick={() => editRoutine(routine)}>Edit</button>
                   <button className="icon-button" disabled={saving} aria-label={`Archive ${routine.name}`} onClick={() => {
+                    if (!window.confirm(`Delete routine "${routine.name}"? Are you sure?`)) return;
                     void db.routines.update(routine.id, { archived: true, updatedAt: Date.now() })
                       .then(() => { if (editing?.id === routine.id) resetForm(); })
                       .catch((archiveError: unknown) => setError(archiveError instanceof Error ? archiveError.message : 'Could not archive this routine.'));
@@ -550,7 +552,7 @@ function WorkoutPage({ exercises }: { exercises: Exercise[] }) {
                     <span className="sr-only">Actual {item.exerciseType === 'time' ? 'seconds' : 'reps'} for set {index + 1}</span>
                     <input type="number" min="0" value={item.actual ?? item.target} onChange={(event) => void saveWorkoutChange(() => updateActual(item, Number(event.target.value)))} />
                   </label>
-                  <button className="remove-set" aria-label={`Remove set ${index + 1}`} onClick={() => void saveWorkoutChange(() => db.sessionSets.delete(item.id))}>×</button>
+                  <button className="remove-set" aria-label={`Remove set ${index + 1}`} onClick={() => { if (window.confirm(`Remove set ${index + 1}? Are you sure?`)) void saveWorkoutChange(() => db.sessionSets.delete(item.id)); }}>×</button>
                 </div>
               ))}
             </div>
