@@ -24,7 +24,7 @@ Create a production build with `npm run build`.
 
 - Create and edit exercises tracked by repetitions or time, with an optional weight (kg), notes and an optional photo. A single photo picker offers Take Photo or Photo Library on iPhone; camera behavior still needs a real-device check. The kg value is shown in the library, routine summaries and workouts, and is snapshotted into each workout.
 - Create and edit ordered routines, including adding/removing/reordering exercises and changing planned sets and reps/seconds. Edits preserve IDs and do not change existing workout snapshots.
-- Start routine-based or free workouts, tick sets in any order, edit actual values, add/remove sets, add exercises, and resume an in-progress session.
+- Start routine-based or free workouts, tick sets in any order, edit actual values, add/remove sets, add exercises, and resume an in-progress session. Exercises with a photo show a thumbnail on their workout card; tap it to enlarge, tap × or anywhere to close.
 - Deleting an exercise, routine, routine item, workout set or photo asks "Are you sure?" first.
 - Time-based sets use a persisted start timestamp so elapsed time remains accurate after the app is backgrounded.
 - Every set has a completion checkbox, including timed exercises: tick it without running the timer to record the displayed actual value (the target by default). Ticking a running set stops its timer without replacing the displayed actual value. The separate Time/Stop control remains available for measured durations.

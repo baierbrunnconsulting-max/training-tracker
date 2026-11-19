@@ -532,7 +532,8 @@ function WorkoutPage({ exercises }: { exercises: Exercise[] }) {
         {groupSets(sessionSets).map(({ exerciseName, exerciseType, kg: groupKg, sets: grouped }) => (
           <article className="workout-card" key={grouped[0].exerciseId}>
             <div className="workout-card-heading">
-              <div><h3>{exerciseName}</h3><p>{exerciseType === 'time' ? 'Timed sets · seconds' : 'Repetition sets'}{groupKg !== undefined ? ` · ${groupKg} kg` : ''}</p></div>
+              <ZoomablePhoto photo={exercises.find((exercise) => exercise.id === grouped[0].exerciseId)?.photo} name={exerciseName} />
+              <div className="workout-card-title"><h3>{exerciseName}</h3><p>{exerciseType === 'time' ? 'Timed sets · seconds' : 'Repetition sets'}{groupKg !== undefined ? ` · ${groupKg} kg` : ''}</p></div>
               <button className="text-button" onClick={() => void saveWorkoutChange(() => addSet(grouped[0].exerciseId))}>+ Set</button>
             </div>
             <div className="set-list">
@@ -811,7 +812,7 @@ function EmptyState({ title, detail }: { title: string; detail: string }) {
   return <div className="empty-state"><span aria-hidden="true">✦</span><h3>{title}</h3><p>{detail}</p></div>;
 }
 
-function ExercisePhoto({ photo }: { photo?: Blob }) {
+function usePhotoUrl(photo?: Blob): string {
   const [url, setUrl] = useState('');
   useEffect(() => {
     if (!photo) {
@@ -822,6 +823,36 @@ function ExercisePhoto({ photo }: { photo?: Blob }) {
     setUrl(objectUrl);
     return () => URL.revokeObjectURL(objectUrl);
   }, [photo]);
+  return url;
+}
+
+function ZoomablePhoto({ photo, name }: { photo?: Blob; name: string }) {
+  const url = usePhotoUrl(photo);
+  const [open, setOpen] = useState(false);
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (event: KeyboardEvent) => { if (event.key === 'Escape') setOpen(false); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open]);
+  if (!url) return null;
+  return (
+    <>
+      <button type="button" className="thumb-button" aria-label={`Enlarge photo of ${name}`} onClick={() => setOpen(true)}>
+        <img className="exercise-thumb" src={url} alt="" />
+      </button>
+      {open && (
+        <div className="photo-overlay" role="dialog" aria-modal="true" aria-label={`Photo of ${name}`} onClick={() => setOpen(false)}>
+          <img src={url} alt={name} />
+          <button type="button" className="photo-close" aria-label="Close photo" onClick={() => setOpen(false)}>×</button>
+        </div>
+      )}
+    </>
+  );
+}
+
+function ExercisePhoto({ photo }: { photo?: Blob }) {
+  const url = usePhotoUrl(photo);
   return url
     ? <img className="exercise-thumb" src={url} alt="" />
     : <div className="exercise-thumb placeholder-thumb" aria-hidden="true">✦</div>;
